@@ -29,7 +29,7 @@ export interface StepsProps {
   className?: string;
   children?: React.ReactNode;
   direction?: 'horizontal' | 'vertical';
-  type?: 'default' | 'navigation';
+  type?: 'default' | 'navigation' | 'inline';
   labelPlacement?: 'horizontal' | 'vertical';
   iconPrefix?: string;
   status?: Status;
@@ -40,6 +40,7 @@ export interface StepsProps {
   initial?: number;
   icons?: Icons;
   items?: StepProps[];
+  itemRender?: (item: StepProps, stepItem: React.ReactNode) => React.ReactNode;
   onChange?: (current: number) => void;
 }
 
@@ -84,16 +85,25 @@ export default class Steps extends React.Component<StepsProps> {
       initial,
       icons,
       onChange,
+      itemRender,
       items = [],
       ...restProps
     } = this.props;
     const isNav = type === 'navigation';
-    const adjustedLabelPlacement = progressDot ? 'vertical' : labelPlacement;
-    const classString = classNames(prefixCls, `${prefixCls}-${direction}`, className, {
-      [`${prefixCls}-${size}`]: size,
-      [`${prefixCls}-label-${adjustedLabelPlacement}`]: direction === 'horizontal',
-      [`${prefixCls}-dot`]: !!progressDot,
+    const isInline = type === 'inline';
+
+    // inline type requires fixed progressDot direction size.
+    const mergeProgressDot = isInline || progressDot;
+    const mergeDirection = isInline ? 'horizontal' : direction;
+    const mergeSize = isInline ? undefined : size;
+
+    const adjustedLabelPlacement = mergeProgressDot ? 'vertical' : labelPlacement;
+    const classString = classNames(prefixCls, `${prefixCls}-${mergeDirection}`, className, {
+      [`${prefixCls}-${mergeSize}`]: mergeSize,
+      [`${prefixCls}-label-${adjustedLabelPlacement}`]: mergeDirection === 'horizontal',
+      [`${prefixCls}-dot`]: !!mergeProgressDot,
       [`${prefixCls}-navigation`]: isNav,
+      [`${prefixCls}-inline`]: isInline,
     });
 
     return (
@@ -117,6 +127,15 @@ export default class Steps extends React.Component<StepsProps> {
               }
             }
 
+            if (isInline) {
+              item.icon = undefined;
+              item.subTitle = undefined;
+            }
+
+            if (!item.render && itemRender) {
+              item.render = (stepItem) => itemRender(item, stepItem);
+            }
+
             return (
               <Step
                 {...item}
@@ -127,7 +146,7 @@ export default class Steps extends React.Component<StepsProps> {
                 prefixCls={prefixCls}
                 iconPrefix={iconPrefix}
                 wrapperStyle={style}
-                progressDot={progressDot}
+                progressDot={mergeProgressDot}
                 stepIcon={stepIcon}
                 icons={icons}
                 onStepClick={onChange && this.onStepClick}

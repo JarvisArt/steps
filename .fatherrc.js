@@ -1,9 +1,9 @@
-export default {
-  cjs: 'babel',
-  esm: { type: 'babel', importLibToEs: true },
-  preCommit: {
-    eslint: true,
-    prettier: true,
+import { defineConfig } from 'father';
+
+export default defineConfig({
+  platform: 'browser',
+  cjs: { output: 'lib' },
+  esm: {
+    output: 'es',
   },
-  runtimeHelpers: true,
-};
+});

@@ -228,6 +228,36 @@ describe('Steps', () => {
       expect(wrapper).toMatchSnapshot();
     });
 
+    it('renders step with type inline', () => {
+      description = 'This is a description.';
+      const wrapper = render(
+        <Steps
+          type="inline"
+          current={1}
+          onChange={() => {}}
+          items={[
+            {
+              title: 'Step 1',
+              description,
+            },
+            {
+              title: 'Step 2',
+              description,
+            },
+            {
+              title: 'Step 3',
+              description,
+              disabled: true,
+            },
+          ]}
+          itemRender={(item, stepItem) => (
+            React.cloneElement(stepItem, { title: item.description })
+          )}
+        />,
+      );
+      expect(wrapper).toMatchSnapshot();
+    });
+
     function getFinishIcon() {
       const path =
         'M923 283.6c-13.4-31.1-32.6-58.9-56.9-82.8-24.3-23.8-52.' +
